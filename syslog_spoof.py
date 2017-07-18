@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-syslog_spoof.py -- sends spoofed syslog messages to a serve.
+syslog_spoof.py -- sends spoofed syslog messages to a server.
   by Daniel Roberson @dmfroberson July/2017
 
 TODO:
