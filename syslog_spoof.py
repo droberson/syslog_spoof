@@ -34,17 +34,19 @@ def send_syslog(
         target, hostname, program, message,
         dport=514,
         source_ip=None,
-        priority=syslog.LOG_INFO,
-        facility=syslog.LOG_SYSLOG):
+        pid=None,
+        priority=syslog.LOG_WARNING,
+        facility=syslog.LOG_USER):
     """ send_syslog() -- Sends spoofed syslog messages.
 
     Args (required):
         target (str)    - IP address of syslog server.
         hostname (str)  - Hostname in the syslog message.
-        program (str)   - Program name in the syslog message.
+        program (str)   - Process name in the syslog message.
         message (str)   - The message.
 
     Args (optional):
+        pid (int)       - PID to use for process name
         dport (int)     - Destination port of syslog server.
         source_ip (str) - IP address to spoof to.
         priority        - Syslog priority.
@@ -57,6 +59,9 @@ def send_syslog(
     prival = priority | facility
     sport = random.randint(1025, 65535)
 
+    if pid == None:
+        pid = random.randint(2, 65535)
+
     # Use spoofed IP address
     if source_ip:
         syslog_message = \
@@ -66,7 +71,7 @@ def send_syslog(
                 time.strftime("%b %d %H:%M:%S ") + \
                 hostname + " " + \
                 program + \
-                "[" + str(random.randint(1, 65535)) + "]: " + \
+                "[" + str(pid) + "]: " + \
                 message)
 
     # Use actual IP address
@@ -78,7 +83,7 @@ def send_syslog(
                 time.strftime("%b %d %H:%M:%S ") + \
                 hostname + " " + \
                 program + \
-                "[" + str(random.randint(1, 65535)) + "]: " + \
+                "[" + str(pid) + "]: " + \
                 message)
 
     # Send the packet!
@@ -110,6 +115,9 @@ def main():
                         "--progname",
                         required=True,
                         help="Spoofed program name")
+    parser.add_argument("--pid",
+                        required=False,
+                        help="PID to use for program name")
     parser.add_argument("-m",
                         "--message",
                         required=True,
@@ -131,7 +139,7 @@ def main():
 
     print "[+] Sending spoofed syslog packet to %s" % args.target
     send_syslog(args.target, args.hostname, args.progname, args.message,
-                source_ip=args.source)
+                source_ip=args.source, pid=args.pid)
                         
     
 if __name__ == "__main__":
